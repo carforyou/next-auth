@@ -108,6 +108,7 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
   const isCredentials = providers[provider].type === "credentials"
   const isEmail = providers[provider].type === "email"
   const isSupportingReturn = isCredentials || isEmail
+  const isSilentOauth = providers[provider].type === "oauth" && authorizationParams.prompt === "none"
 
   const signInUrl = `${baseUrl}/${
     isCredentials ? "callback" : "signin"
@@ -130,7 +131,7 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
 
   const data = await res.json()
 
-  if (redirect || !isSupportingReturn) {
+  if ((redirect || !isSupportingReturn) && !isSilentOauth) {
     const url = data.url ?? callbackUrl
     window.location.replace(url)
     // If url contains a hash, the browser does not reload the page. We reload manually
